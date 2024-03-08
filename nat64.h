@@ -107,9 +107,9 @@ static inline __be32 map_6to4(struct in6_addr *addr6, short map_v6_byte1, short 
 		(map_v6_byte3>=0 && map_v6_byte3<=15)
 	) {
 		addr4 = ntohl(state.ipv4_addr);
-		if(map_v6_byte1>0 && map_v6_byte1<15) addr4 = addr4 + addr6->s6_addr[map_v6_byte1];
-		if(map_v6_byte2>0 && map_v6_byte2<15) addr4 = addr4 + (addr6->s6_addr[map_v6_byte2] << 8);
-		if(map_v6_byte3>0 && map_v6_byte3<15) addr4 = addr4 + (addr6->s6_addr[map_v6_byte3] << 16);
+		if(map_v6_byte1>=0 && map_v6_byte1<=15) addr4 = addr4 + addr6->s6_addr[map_v6_byte1];
+		if(map_v6_byte2>=0 && map_v6_byte2<=15) addr4 = addr4 + (addr6->s6_addr[map_v6_byte2] << 8);
+		if(map_v6_byte3>=0 && map_v6_byte3<=15) addr4 = addr4 + (addr6->s6_addr[map_v6_byte3] << 16);
 		addr4 = htonl(addr4);
 	} else {
 		__be32 addr_hash = addr6->s6_addr32[0] ^ addr6->s6_addr32[1] ^ addr6->s6_addr32[2] ^ addr6->s6_addr32[3];
