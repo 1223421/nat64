@@ -102,9 +102,9 @@ static inline __be32 map_6to4(struct in6_addr *addr6, short map_v6_byte1, short 
 {
 	__be32 addr4;
 	if(
-		(map_v6_byte1>0 && map_v6_byte1<15) ||
-		(map_v6_byte2>0 && map_v6_byte2<15) ||
-		(map_v6_byte3>0 && map_v6_byte3<15)
+		(map_v6_byte1>=0 && map_v6_byte1<=15) ||
+		(map_v6_byte2>=0 && map_v6_byte2<=15) ||
+		(map_v6_byte3>=0 && map_v6_byte3<=15)
 	) {
 		addr4 = ntohl(state.ipv4_addr);
 		if(map_v6_byte1>0 && map_v6_byte1<15) addr4 = addr4 + addr6->s6_addr[map_v6_byte1];
