@@ -98,11 +98,23 @@ static inline __be16 nat64_hash6(struct in6_addr addr6, __be16 port)
 	return (addr4 >> 16) ^ addr4 ^ port;
 }
 
-static inline __be32 map_6to4(struct in6_addr *addr6)
+static inline __be32 map_6to4(struct in6_addr *addr6, short map_v6_byte1, short map_v6_byte2, short map_v6_byte3)
 {
-	__be32 addr_hash = addr6->s6_addr32[0] ^ addr6->s6_addr32[1] ^ addr6->s6_addr32[2] ^ addr6->s6_addr32[3];
-	__be32 addr4 = htonl(ntohl(state.ipv4_addr) + (addr_hash % (1<<(32 - state.ipv4_prefixlen))));
-
+	__be32 addr4;
+	if(
+		(map_v6_byte1>0 && map_v6_byte1<15) ||
+		(map_v6_byte2>0 && map_v6_byte2<15) ||
+		(map_v6_byte3>0 && map_v6_byte3<15)
+	) {
+		addr4 = ntohl(state.ipv4_addr);
+		if(map_v6_byte1>0 && map_v6_byte1<15) addr4 = addr4 + addr6->s6_addr[map_v6_byte1];
+		if(map_v6_byte2>0 && map_v6_byte2<15) addr4 = addr4 + (addr6->s6_addr[map_v6_byte2] << 8);
+		if(map_v6_byte3>0 && map_v6_byte3<15) addr4 = addr4 + (addr6->s6_addr[map_v6_byte3] << 16);
+		addr4 = htonl(addr4);
+	} else {
+		__be32 addr_hash = addr6->s6_addr32[0] ^ addr6->s6_addr32[1] ^ addr6->s6_addr32[2] ^ addr6->s6_addr32[3];
+		addr4 = htonl(ntohl(state.ipv4_addr) + (addr_hash % (1<<(32 - state.ipv4_prefixlen))));
+	}
 //	printk("nat64: [inline] map_6to4 %pI6c mod %pI4/%d -> %pI4 + %d -> %pI4\n", addr6, &state.ipv4_addr, state.ipv4_prefixlen, &state.ipv4_addr, (addr_hash % (1<<(32 - state.ipv4_prefixlen))), &addr4);
 	return addr4;
 }

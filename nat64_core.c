@@ -65,6 +65,16 @@ static char     *ipv6_prefix = "64:ff9b::/96";
 module_param(ipv6_prefix, charp, 0);
 MODULE_PARM_DESC(ipv6_prefix, "IPv6 prefix used for NAT64 service address, default is \"64:ff9b::/96\".");
 
+static short map_v6_byte1 = -1;
+static short map_v6_byte2 = -1;
+static short map_v6_byte3 = -1;
+
+module_param(map_v6_byte1, short, 0);
+MODULE_PARM_DESC(map_v6_byte1, "IPv6 address 1 byte for map in IPv4. For example 7 byte: xxxx:xxxx:xxxx:xxYY::/64 => xx.xx.xx.YY");
+module_param(map_v6_byte2, short, 0);
+MODULE_PARM_DESC(map_v6_byte2, "IPv6 address 2 byte for map in IPv4. For example 7 byte: xxxx:xxxx:xxxx:xxYY::/64 => xx.xx.YY.xx");
+module_param(map_v6_byte3, short, 0);
+MODULE_PARM_DESC(map_v6_byte3, "IPv6 address 3 byte for map in IPv4. For example 7 byte: xxxx:xxxx:xxxx:xxYY::/64 => xx.YY.xx.xx");
 static void clean_expired_sessions(struct list_head *queue)
 {
 	struct list_head	*pos;
@@ -197,7 +207,7 @@ void inline nat64_handle_icmp6(struct sk_buff *skb, struct ipv6hdr *ip6h)
 				session = session_create(bib, extract_ipv4(ip6h->daddr, state.prefix_len), icmph->un.echo.id, ICMP_DEFAULT);
 		}
 		else
-			bib = bib_session_create(&ip6h->saddr, extract_ipv4(ip6h->daddr, state.prefix_len), icmph->un.echo.id, icmph->un.echo.id, IPPROTO_ICMP, ICMP_DEFAULT);
+			bib = bib_session_create(&ip6h->saddr, extract_ipv4(ip6h->daddr, state.prefix_len), icmph->un.echo.id, icmph->un.echo.id, IPPROTO_ICMP, ICMP_DEFAULT, map_v6_byte1, map_v6_byte2, map_v6_byte3);
 
 		nat64_translate_6to4(skb, bib, new_type, IPPROTO_ICMP);
 	} else {
@@ -264,7 +274,7 @@ int nat64_netdev_ipv6_input(struct sk_buff *old_skb)
 		}
 		else if(tcph->syn)
 		{
-			bib = bib_session_create(&ip6h->saddr, extract_ipv4(ip6h->daddr, state.prefix_len), tcph->source, tcph->dest, IPPROTO_TCP, TCP_TRANS);
+			bib = bib_session_create(&ip6h->saddr, extract_ipv4(ip6h->daddr, state.prefix_len), tcph->source, tcph->dest, IPPROTO_TCP, TCP_TRANS, map_v6_byte1, map_v6_byte2, map_v6_byte3);
 			if(!bib)
 				return -1;
 
@@ -292,7 +302,7 @@ int nat64_netdev_ipv6_input(struct sk_buff *old_skb)
 				session = session_create(bib, extract_ipv4(ip6h->daddr, state.prefix_len), udph->dest, UDP_DEFAULT);
 		}
 		else
-			bib = bib_session_create(&ip6h->saddr, extract_ipv4(ip6h->daddr, state.prefix_len), udph->source, udph->dest, IPPROTO_UDP, UDP_DEFAULT);
+			bib = bib_session_create(&ip6h->saddr, extract_ipv4(ip6h->daddr, state.prefix_len), udph->source, udph->dest, IPPROTO_UDP, UDP_DEFAULT, map_v6_byte1, map_v6_byte2, map_v6_byte3);
 
 
 		nat64_translate_6to4(old_skb, bib, udph->dest, IPPROTO_UDP);

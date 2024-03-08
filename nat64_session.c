@@ -229,12 +229,12 @@ struct bib_entry *bib_create(struct in6_addr *remote6_addr, __be16 remote6_port,
 	return bib;
 }
 
-struct bib_entry *bib_session_create(struct in6_addr *saddr, __be32 daddr, __be16 sport, __be16 dport, int protocol, enum expiry_type type)
+struct bib_entry *bib_session_create(struct in6_addr *saddr, __be32 daddr, __be16 sport, __be16 dport, int protocol, enum expiry_type type, short map_v6_byte1, short map_v6_byte2, short map_v6_byte3)
 {
 	struct bib_entry	*bib;
 	struct session_entry	*session;
 	int			local4_port;
-	__be32			local4_ip = map_6to4(saddr);
+	__be32			local4_ip = map_6to4(saddr, map_v6_byte1, map_v6_byte2, map_v6_byte3);
 
 	//map_6to4(saddr);
 	local4_port = bib_allocate_local4_port(local4_ip, sport, protocol);
